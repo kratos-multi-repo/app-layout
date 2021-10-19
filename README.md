@@ -16,7 +16,7 @@
 
 一般开发流程：
 
-通过 `protocol-buffers` 约定协议，并生成 `sdk (helloworld-sdk)` ，在隐私项目中引入 `skd` 即可。
+通过 `protocol-buffers` 约定协议，并生成 `sdk (helloworld-sdk)` ，在隐私项目中引入 `sdk` 即可。
 
 ## Run
 
