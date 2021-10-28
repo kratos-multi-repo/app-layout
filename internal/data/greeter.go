@@ -4,26 +4,37 @@ import (
 	"context"
 
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/kratos-multi-repo/app-layout/internal/biz"
+	"github.com/kratos-multi-repo/app-layout/internal/biz/greeter"
+	"github.com/kratos-multi-repo/app-layout/internal/data/model"
+	"github.com/save95/xerror"
+	"github.com/save95/xerror/xcode"
+	"gorm.io/gorm"
 )
 
 type greeterRepo struct {
-	data *Data
-	log  *log.Helper
+	db  *gorm.DB
+	log *log.Helper
 }
 
 // NewGreeterRepo .
-func NewGreeterRepo(data *Data, logger log.Logger) biz.GreeterRepo {
+func NewGreeterRepo(client *Client, logger log.Logger) greeter.IRepo {
 	return &greeterRepo{
-		data: data,
-		log:  log.NewHelper(logger),
+		db:  client.platform,
+		log: log.NewHelper(logger),
 	}
 }
 
-func (r *greeterRepo) CreateGreeter(ctx context.Context, g *biz.Greeter) error {
-	return nil
-}
+func (r *greeterRepo) Create(ctx context.Context, g *greeter.Entity) error {
+	r.log.Infof("%s say hello", g.Name)
+	if len(g.Name) == 0 {
+		return xerror.WithXCode(xcode.DBRequestParamError)
+	}
 
-func (r *greeterRepo) UpdateGreeter(ctx context.Context, g *biz.Greeter) error {
+	// storage
+	entity := &model.Greeter{Name: g.Name}
+	if err := r.db.WithContext(ctx).Create(entity).Error; nil != err {
+		return xerror.WrapWithXCode(err, xcode.DBFailed)
+	}
+
 	return nil
 }

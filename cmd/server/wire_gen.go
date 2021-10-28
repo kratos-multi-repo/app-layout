@@ -8,7 +8,7 @@ package main
 import (
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/kratos-multi-repo/app-layout/internal/biz"
+	"github.com/kratos-multi-repo/app-layout/internal/biz/greeter"
 	"github.com/kratos-multi-repo/app-layout/internal/conf"
 	"github.com/kratos-multi-repo/app-layout/internal/data"
 	"github.com/kratos-multi-repo/app-layout/internal/server"
@@ -19,13 +19,13 @@ import (
 
 // initApp init kratos application.
 func initApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*kratos.App, func(), error) {
-	dataData, cleanup, err := data.NewData(confData, logger)
+	client, cleanup, err := data.NewClient(confData, logger)
 	if err != nil {
 		return nil, nil, err
 	}
-	greeterRepo := data.NewGreeterRepo(dataData, logger)
-	greeterUsecase := biz.NewGreeterUsecase(greeterRepo, logger)
-	greeterService := service.NewGreeterService(greeterUsecase, logger)
+	iRepo := data.NewGreeterRepo(client, logger)
+	iUseCase := greeter.NewUseCase(iRepo, logger)
+	greeterService := service.NewGreeterService(iUseCase, logger)
 	httpServer := server.NewHTTPServer(confServer, greeterService, logger)
 	grpcServer := server.NewGRPCServer(confServer, greeterService, logger)
 	app := newApp(logger, httpServer, grpcServer)
